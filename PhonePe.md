@@ -1,5 +1,236 @@
 # PhonePe - Super Dream Offer Placement Questions
 
+# 3. Dora The Explorer
+
+## Problem Statement
+
+Dora is vacationing on an archipelago of **N** islands. She starts her vacation on island **S** and ends it on island **E**. Dora travels between islands using **two modes of transportation**: **Boat** and **Sea Plane**.  
+
+Dora wants to:  
+- Use **exactly one mode exclusively** for some part of her journey,  
+- Then **switch modes exactly once**,  
+- And complete her trip from **S** to **E**.
+
+For example, Dora can travel from **S** to some island **I** using **only Boat** (possibly visiting intermediate islands), then from **I** to **E** using **only Plane** (also possibly through other islands). Or, she may travel using **Plane first** then switch to **Boat** at some island.
+
+You are given two cost matrices:
+- `B[i][j]`: cost of traveling from island `i` to `j` by Boat,
+- `P[i][j]`: cost of traveling from island `i` to `j` by Plane.
+
+If `B[i][j]` or `P[i][j]` is `-1`, it means travel directly between `i` and `j` by that mode is not possible.
+
+Your task is to find the minimum possible cost of the entire trip. If no valid path exists, return `-1`.
+
+---
+
+## Input Format
+
+- First line: Integer `N` — number of islands.
+- Next `N` lines: Each contains `N` integers denoting Boat cost matrix `B`.
+- Next `N` lines: Each contains `N` integers denoting Plane cost matrix `P`.
+- Last line: Two integers `S` and `E` denoting start and end islands.
+
+---
+
+## Constraints
+
+- `3 <= N <= 1250`
+- `1 <= S, E <= N` and `S != E`
+- `-1` or `1 <= B[i][j], P[i][j] <= 100`
+
+---
+
+## Output Format
+
+- A single integer — minimum total cost of Dora's vacation; `-1` if not possible.
+
+---
+
+## Sample Input 1
+
+```
+3
+-1 1 2
+3 -1 4
+5 6 -1
+-1 6 5
+1 -1 4
+3 2 -1
+1 2
+```
+
+## Sample Output 1
+
+```
+4
+```
+
+### Explanation
+
+- Dora travels from Island 1 → Island 3 by **Boat** at cost 2.
+- Then from Island 3 → Island 2 by **Plane** at cost 2.
+- Total cost = 2 + 2 = 4.
+
+---
+
+## Sample Input 2
+
+```
+5
+-1 3 38 96 1
+40 -1 16 24 73
+5 52 -1 93 34
+78 10 73 -1 84
+50 15 51 53 -1
+-1 67 30 50 45
+96 -1 5 2 12
+60 19 -1 51 46
+-1 56 79 -1 2
+83 2 30 5 -1
+1 4
+```
+
+## Sample Output 2
+
+```
+5
+```
+
+### Explanation
+
+- Dora routes: Island 1 → Island 5 by Boat (cost 1)
+- Island 5 → Island 2 → Island 4 by Plane (cost 2 + 2)
+- Total cost = 1 + 2 + 2 = 5.
+
+---
+
+# Approach: Shortest Path with Mandatory Mode Switch
+
+This problem is a variant of the shortest path problem with a **mandatory single mode switch**. We use **Dijkstra’s algorithm** on both transportation modes independently to compute shortest paths and combine results.
+
+---
+
+## Solution Outline
+
+1. Compute shortest costs for:
+   - Boat travel **from S** to every island → `boatFromS[]`
+   - Plane travel **from S** to every island → `planeFromS[]`
+   - Boat travel **to E** from every island → `boatToE[]`
+   - Plane travel **to E** from every island → `planeToE[]`
+
+2. For every island `i` (except `S` and `E`), consider switching at `i`:
+   - Case 1: Boat from `S` to `i` + Plane from `i` to `E`
+   - Case 2: Plane from `S` to `i` + Boat from `i` to `E`
+
+3. Find the minimum total cost over all `i`.
+
+---
+
+## Java Code Implementation
+
+```java
+import java.util.*;
+
+public class Main {
+
+    static final int INF = Integer.MAX_VALUE;
+    static int N;
+    static int[][] B, P;
+
+    // Dijkstra to find shortest paths from src on given graph
+    static int[] dijkstra(int[][] graph, int src) {
+        int[] dist = new int[N];
+        Arrays.fill(dist, INF);
+        dist[src] = 0;
+
+        PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(a -> a[1]));
+        pq.offer(new int[]{src, 0});
+
+        while (!pq.isEmpty()) {
+            int[] cur = pq.poll();
+            int u = cur[0], d = cur[1];
+            if (d > dist[u]) continue;
+
+            for (int v = 0; v < N; v++) {
+                if (graph[u][v] == -1) continue;
+                int nd = d + graph[u][v];
+                if (nd < dist[v]) {
+                    dist[v] = nd;
+                    pq.offer(new int[]{v, nd});
+                }
+            }
+        }
+        return dist;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        N = sc.nextInt();
+        B = new int[N][N];
+        P = new int[N][N];
+
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < N; j++)
+                B[i][j] = sc.nextInt();
+
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < N; j++)
+                P[i][j] = sc.nextInt();
+
+        int S = sc.nextInt() - 1;
+        int E = sc.nextInt() - 1;
+
+        int[] boatFromS = dijkstra(B, S);
+        int[] planeFromS = dijkstra(P, S);
+        int[] boatToE = dijkstra(B, E);
+        int[] planeToE = dijkstra(P, E);
+
+        int minCost = INF;
+        for (int i = 0; i < N; i++) {
+            if (i == S || i == E) continue;
+
+            // Switch: Boat -> Plane
+            if (boatFromS[i] != INF && planeToE[i] != INF)
+                minCost = Math.min(minCost, boatFromS[i] + planeToE[i]);
+
+            // Switch: Plane -> Boat
+            if (planeFromS[i] != INF && boatToE[i] != INF)
+                minCost = Math.min(minCost, planeFromS[i] + boatToE[i]);
+        }
+
+        System.out.println(minCost == INF ? -1 : minCost);
+    }
+}
+```
+
+---
+
+## Step-by-Step Example (Sample Input 1)
+
+- Islands = 3, S=1, E=2 (0-based: S=0, E=1)  
+- After running Dijkstra:
+
+| Island `i` | boatFromS | planeFromS | boatToE | planeToE |
+|------------|------------|------------|---------|----------|
+| 0          | 0          | 0          | 3       | 1        |
+| 1          | 1          | 6          | 0       | 0        |
+| 2          | 2          | 5          | 4       | 2        |
+
+- Check switching at island 2:  
+  - Boat S->2 + Plane 2->E = 2 + 2 = 4  
+  - Plane S->2 + Boat 2->E = 5 + 4 = 9  
+- Minimum = 4
+
+---
+
+## Execution Time Limit
+
+- 10 seconds (efficient Dijkstra implementation needed).
+
+---
+---
+
 # 4. Fun Friday
 
 ## Problem Statement
