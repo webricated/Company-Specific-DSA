@@ -1,5 +1,291 @@
 # PhonePe - Super Dream Offer Placement Questions
 
+# 2. Help Mike Get Rich
+
+## Problem Statement
+
+Mike Ross is a brilliant lawyer who wins all his cases. However, he is not a morning person. His law firm has introduced a new rule: to be eligible for a bonus, every lawyer must review **at least one pending case document every day**. If a lawyer misses even a single day, their bonus for that year is forfeited.
+
+To maintain fairness in case distribution, the following rules are set:  
+
+1. Whenever a lawyer arrives at the office, they join a queue waiting for the next case distribution event.  
+2. Each case distribution event on a day distributes a fixed number of cases.  
+3. At distribution time, lawyers who arrived earliest get assigned cases first.  
+4. If cases remain undistributed and no lawyers are waiting in queue, those cases go to senior partners and are considered lost opportunities.  
+5. Case distribution times and the number of cases distributed per event can **change daily** (different test cases).  
+
+**Important note:**  
+- No two lawyers arrive at exactly the same time.
+
+---
+
+## Mike's Dilemma
+
+Mike has a vision: an unordered list of timestamps representing the next day's **case distribution events** and the arrival times of his competing lawyers. Mike wants to figure out the **latest arrival time** at the office such that he still gets assigned a case on that day (thus preserving his bonus streak).
+
+---
+
+## Input Format
+
+- **Line 1:** An integer `n` — number of case distribution events in the day.
+- **Line 2:** `n` space-separated integers — timestamps of the distribution events (in arbitrary order).
+- **Line 3:** An integer `m` — number of competing lawyers (excluding Mike).
+- **Line 4:** `m` space-separated integers — arrival timestamps of competing lawyers (in arbitrary order).
+- **Line 5:** An integer `c` — number of cases distributed per event.
+
+---
+
+## Constraints
+
+- `1 <= n <= 10^5` (number of distribution events)
+- `1 <= m <= 10^5` (number of competing lawyers)
+- `1 <= c <= 10^4` (cases per distribution event)
+- All timestamps are integers starting from 0 (day starts at time 0).
+- No two lawyers share the same arrival timestamp.
+- Distribution event times and arrival times may not be sorted.
+
+---
+
+## Output Format
+
+- Print a single integer — the **latest timestamp** Mike can arrive at the office and still get assigned a case on the given day.
+
+---
+
+## Sample Input 1
+
+```
+3
+20 30 10
+7
+19 13 26 4 25 11 21
+2
+```
+
+## Sample Output 1
+
+```
+20
+```
+
+### Explanation
+
+- Distribution events: at times 10, 20, and 30.
+- Cases per event: 2
+- Lawyers arrive at timestamps: 4, 11, 13, 19, 21, 25, 26.
+
+**Event at 10:**  
+- Cases assigned to lawyer who arrived at 4.  
+- One case remains and is lost since no other lawyers have arrived yet.
+
+**Event at 20:**  
+- Available lawyers by 20 are those who arrived before or at 20: 11, 13, 19, and Mike (arriving at 20, latest possible).  
+- The first two cases go to the two earliest arrivals: 11 and 13.  
+- Mike also arrived exactly at 20, so he will be next in queue.
+
+**Event at 30:**  
+- Remaining lawyers including those arriving before 30: 19, 20 (Mike), 21, 25, 26.  
+- Cases are assigned in order of arrival time.
+
+If Mike arrived any later than 20, a lawyer arriving at 21 would receive the case first, breaking Mike’s streak.
+
+---
+
+## Sample Input 2
+
+```
+2
+10 20
+4
+2 17 18 19
+2
+```
+
+## Sample Output 2
+
+```
+16
+```
+
+### Explanation
+
+- Distribution events at 10 and 20, 2 cases each.
+- Lawyers arrive at: 2, 17, 18, 19.
+
+**Event at 10:**  
+- Lawyer at 2 gets a case.  
+- One case left unused (no other lawyers have arrived yet).
+
+**Event at 20:**  
+- Lawyers arrived before 20: 17, 18, 19 and possibly Mike who wants to arrive latest.  
+- If Mike arrives at 16, he will also be in time to receive a case.  
+- If Mike arrives after 16, lawyers 17, 18, 19 go first and Mike misses out.
+
+---
+
+## Clarifications
+
+- Lawyers can only get a case if they have arrived **at or before** the distribution timestamp.
+- Mike must **arrive before or exactly at** some timestamp where he can be assigned a case, considering the queue order and batches.
+- If Mike arrives at a timestamp where all cases are given out to lawyers who arrived earlier, Mike misses the streak.
+
+---
+
+## Goal
+
+Find the maximum possible arrival timestamp for Mike to ensure he receives at least one case that day.
+
+---
+
+## Additional Notes
+
+- Consider sorting the distribution timestamps and lawyer arrivals to simulate the process in chronological order.
+- Efficient algorithms and data structures should be used given the input constraints.
+- Pay special attention to how Mike’s arrival impacts the queue order and case allocation.
+
+---
+
+*End of problem statement.*
+
+---
+
+## Problem Recap
+
+Mike Ross wants to maintain a daily streak of receiving at least one case to be eligible for a bonus. Cases are distributed in events throughout the day with fixed batch sizes, and lawyers are assigned cases in order of arrival time (earliest first). Mike wants to find the **latest timestamp he can arrive** at the office and still get a case assigned on that day.
+
+---
+
+## Key Observations
+
+- Cases are assigned **FCFS (First Come, First Serve)** based on arrival times.
+- Mike must arrive **at or before** some distribution event to be considered.
+- At each distribution, up to `c` cases are assigned to waiting lawyers who have not yet received cases.
+- We must find the latest arrival time where inserting Mike still results in Mike getting a case.
+
+---
+
+## Approach
+
+1. **Sort** both distribution event timestamps and lawyer arrival timestamps.
+2. Use **binary search** on possible arrival times for Mike, checking at each step if Mike can secure a case.
+3. To check feasibility, **simulate distribution** with Mike inserted at the candidate arrival timestamp.
+4. Return the maximum arrival time for which Mike still gets a case.
+
+---
+
+## Java Code
+
+```java
+import java.util.*;
+
+public class Main {
+
+    static int n, m, c;
+    static int[] distTimes, lawyerArrivals;
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        n = sc.nextInt();
+        distTimes = new int[n];
+        for (int i = 0; i < n; i++) distTimes[i] = sc.nextInt();
+
+        m = sc.nextInt();
+        lawyerArrivals = new int[m];
+        for (int i = 0; i < m; i++) lawyerArrivals[i] = sc.nextInt();
+
+        c = sc.nextInt();
+
+        Arrays.sort(distTimes);
+        Arrays.sort(lawyerArrivals);
+
+        int lo = 0, hi = (int)1e9;
+        int ans = -1;
+
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (canMikeGetCase(mid)) {
+                ans = mid;  // try later arrival
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
+            }
+        }
+
+        System.out.println(ans);
+    }
+
+    static boolean canMikeGetCase(int mikeArrival) {
+        // Merge Mike’s arrival with existing lawyer arrivals
+        List<Integer> allArrivals = new ArrayList<>();
+        for (int a : lawyerArrivals) allArrivals.add(a);
+        allArrivals.add(mikeArrival);
+        Collections.sort(allArrivals);
+
+        int totalLawyers = allArrivals.size();
+        boolean[] hasCase = new boolean[totalLawyers];
+
+        int ptr = 0; // advances through arrivals as we simulate
+        for (int time : distTimes) {
+            int start = ptr;
+            while (ptr < totalLawyers && allArrivals.get(ptr) <= time) ptr++;
+            int end = ptr;
+
+            int assigned = 0;
+            for (int i = start; i < end && assigned < c; i++) {
+                if (!hasCase[i]) {
+                    hasCase[i] = true;
+                    assigned++;
+                }
+            }
+        }
+
+        for (int i = 0; i < totalLawyers; i++) {
+            if (allArrivals.get(i) == mikeArrival) {
+                return hasCase[i];
+            }
+        }
+        return false;
+    }
+}
+```
+
+---
+
+## Example
+
+Input:
+```
+3
+20 30 10
+7
+19 13 26 4 25 11 21
+2
+```
+
+Output:
+```
+20
+```
+
+---
+
+## Complexity
+
+- Sorting: `O(n log n + m log m)`
+- Each binary search iteration: `O(n + m)`
+- Binary search with ~30 iterations → efficient for input size up to `10^5`.
+
+---
+
+## Summary
+
+By simulating the daily distribution process and using binary search on Mike's arrival time, we can efficiently determine the **latest timestamp** Mike can arrive without losing his daily case streak.
+
+
+---
+---
+
 # 3. Dora The Explorer
 
 ## Problem Statement
