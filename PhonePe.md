@@ -1,7 +1,7 @@
 # PhonePe - Super Dream Offer Placement Questions
 
 
-## 🏃‍♂️ Paris Olympics Hurdle Challenge
+## 1. 🏃‍♂️ Paris Olympics Hurdle Challenge
 
 ### 📝 Problem Statement
 
