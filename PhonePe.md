@@ -1,4 +1,6 @@
-# Fun Friday
+# PhonePe - Super Dream Offer Placement Questions
+
+# 4. Fun Friday
 
 ## Problem Statement
 
