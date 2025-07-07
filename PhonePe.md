@@ -1,52 +1,50 @@
 # PhonePe - Super Dream Offer Placement Questions
 
 
-## 1. 🏃‍♂️ Paris Olympics Hurdle Challenge
+# 🏃‍♂️ Paris Olympics – Hurdle Challenge
 
-### 📝 Problem Statement
+## 📝 Problem Statement
 
-In celebration of the Paris Olympics, the organizing committee has introduced a new game for athletes. The challenge involves crossing a series of **ordered hurdles**, each with an associated **score**. The athlete aims to achieve the **maximum possible score** by strategically skipping (removing) **at most one group of up to `k` consecutive hurdles**.
+The **Paris Olympics** committee has introduced a new game:
 
-### 🧩 Game Rules
+* There are `n` **ordered hurdles**.
+* Each hurdle has a **non-negative integer score**.
+* The athlete is allowed to **keep at most `k` consecutive hurdles**.
+* The athlete aims to **remove hurdles** such that no more than `k` consecutive hurdles are left in the final configuration.
+* The goal is to **maximize the total score of the remaining (kept) hurdles**.
 
-* There are `n` hurdles arranged in a fixed order.
-* Each hurdle has a non-negative integer score.
-* The athlete is allowed to **remove at most one contiguous segment of up to `k` consecutive hurdles**.
-* The athlete earns points from all the **remaining (non-removed)** hurdles.
-* The objective is to **maximize the total score** from the remaining hurdles.
+### ❗ Constraints
 
-### ❗ Important Notes
-
-* The order of the hurdles **cannot be changed**.
-* The athlete may choose **not to remove any hurdles**.
-* The athlete may remove **only one** block (segment) of consecutive hurdles, and the length of this block must be between `1` and `k` (inclusive).
+* Hurdles are **ordered and cannot be reordered**.
+* You can keep **any subset** of hurdles, but **not more than `k` consecutive**.
+* You may **skip (remove)** as many hurdles as needed to satisfy the above rule.
 
 ---
 
-### 📥 Input Format
+## 📥 Input Format
 
-* The first line contains two space-separated integers:
-  `n` — number of hurdles  
-  `k` — maximum number of consecutive hurdles that can be removed  
-* The next `n` lines each contain a single integer — the score of the `i-th` hurdle.
+```
+First line: Two space-separated integers n (number of hurdles) and k (maximum consecutive hurdles allowed)
+Next n lines: Each line contains an integer — score of the i-th hurdle
+```
 
----
-
-### 📤 Output Format
-
-* Output a single integer — the **maximum total score** the athlete can achieve after removing **at most one block of up to `k` consecutive hurdles**.
-
----
-
-### 🔒 Constraints
+### Constraints:
 
 * `1 ≤ n ≤ 10^5`
 * `1 ≤ k ≤ n`
-* `0 ≤ score of each hurdle ≤ 2 × 10^9`
+* `0 ≤ score[i] ≤ 2 * 10^9`
 
 ---
 
-### 📘 Sample Input 0
+## 📤 Output Format
+
+```
+Print a single integer — the maximum score achievable while keeping at most k consecutive hurdles.
+```
+
+---
+
+## 📘 Sample Input 0
 
 ```
 6 2
@@ -64,13 +62,14 @@ In celebration of the Paris Olympics, the organizing committee has introduced a 
 21
 ```
 
-### 🔍 Explanation:
+### 🔍 Explanation
 
-The athlete chooses to remove a block of **2 consecutive hurdles** — hurdles at positions 0 and 3 (values `1` and `1`) is *not* allowed, since only one contiguous block can be removed. Instead, removing the block `[1, 2]` (indices 0 and 1) or `[3,1]` (indices 2 and 3) yields minimal removal sums and maximizes remaining total, resulting in the output 21.
+* You can keep \[2, 3], skip 1, then keep \[6, 10] → total = `2 + 3 + 6 + 10 = 21`
+* Any attempt to keep 3 or more consecutive hurdles (e.g., \[1,2,3]) is **invalid**.
 
 ---
 
-### 📘 Sample Input 1
+## 📘 Sample Input 1
 
 ```
 5 4
@@ -87,109 +86,107 @@ The athlete chooses to remove a block of **2 consecutive hurdles** — hurdles a
 14
 ```
 
-### 🔍 Explanation:
+### 🔍 Explanation
 
-The athlete removes the first hurdle (score `1`). Remaining scores are `[2,3,4,5]` summing to 14.
-
----
-
-## ✅ Problem Summary
-
-- Given `n` hurdles with scores.
-- Remove **at most one block** of length ≤ `k`.
-- Maximize the sum of remaining hurdles.
+* Keep \[2, 3, 4, 5] → total = `2 + 3 + 4 + 5 = 14`
+* \[1, 2, 3, 4, 5] is invalid (5 consecutive kept > 4)
 
 ---
 
-## 🧠 Insight
+## 🔑 Key Points
 
-Maximizing the sum after removal =  
-**Total Sum - minimum sum of a subarray of length ≤ k.**
-
----
-
-## ✅ Strategy
-
-1. Compute total sum of all hurdles.
-2. Using a sliding window, find the minimum sum of any contiguous subarray with length `1` to `k`.
-3. Result = `total_sum - min_subarray_sum`.
+* You must **break long stretches** (more than `k` hurdles) by removing hurdles.
+* Choose when to **skip** a hurdle wisely to **maximize total score**.
+* Use **Dynamic Programming** to track the current best total at each position for different streak lengths.
 
 ---
 
-## ✅ Java Code (O(n))
+## 🧠 Approach (Dynamic Programming)
+
+### Define State:
+
+* Let `dp[i][j]` be the **maximum score** up to index `i` with **j consecutive hurdles kept**.
+* `j` can range from `0` to `k`.
+
+### Transition:
+
+* From `dp[i][j]`:
+
+  * **Skip** current hurdle → move to `dp[i+1][0]`
+  * **Keep** current hurdle if `j < k` → move to `dp[i+1][j+1]` and add current score
+
+### Base Case:
+
+* `dp[0][0] = 0` (starting with 0 score and no streak)
+
+### Final Answer:
+
+* The answer is the **maximum** among all `dp[n][j]` for `j = 0 to k`
+
+---
+
+## ✅ Java Code
 
 ```java
 import java.util.*;
 
-public class Main {
+public class HurdleMaxScore {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-
         int n = sc.nextInt();
         int k = sc.nextInt();
         int[] hurdles = new int[n];
-
-        long total = 0;
         for (int i = 0; i < n; i++) {
             hurdles[i] = sc.nextInt();
-            total += hurdles[i];
         }
 
-        long minRemoval = Long.MAX_VALUE;
-        long windowSum = 0;
-        int left = 0;
+        long[][] dp = new long[n + 1][k + 1];
 
-        for (int right = 0; right < n; right++) {
-            windowSum += hurdles[right];
+        for (int i = 0; i <= n; i++) {
+            Arrays.fill(dp[i], Long.MIN_VALUE);
+        }
 
-            if (right - left + 1 > k) {
-                windowSum -= hurdles[left];
-                left++;
-            }
+        dp[0][0] = 0; // Starting point
 
-            if (right - left + 1 <= k) {
-                minRemoval = Math.min(minRemoval, windowSum);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j <= k; j++) {
+                // Skip current hurdle — reset streak
+                dp[i + 1][0] = Math.max(dp[i + 1][0], dp[i][j]);
+
+                // Keep current hurdle — extend streak if possible
+                if (j < k) {
+                    dp[i + 1][j + 1] = Math.max(dp[i + 1][j + 1], dp[i][j] + hurdles[i]);
+                }
             }
         }
 
-        System.out.println(total - minRemoval);
+        long maxScore = 0;
+        for (int j = 0; j <= k; j++) {
+            maxScore = Math.max(maxScore, dp[n][j]);
+        }
+
+        System.out.println(maxScore);
     }
 }
 ```
 
 ---
 
-## ⏱ Complexity
+## 🧮 Dry Run: Sample Input 0
 
-- Time: `O(n)`
-- Space: `O(n)` due to input storage (no extra significant space).
-
----
-
-## ✅ Python Equivalent
-
-```python
-n, k = map(int, input().split())
-hurdles = [int(input()) for _ in range(n)]
-
-total = sum(hurdles)
-min_removal = float('inf')
-window_sum = 0
-left = 0
-
-for right in range(n):
-    window_sum += hurdles[right]
-    if right - left + 1 > k:
-        window_sum -= hurdles[left]
-        left += 1
-    min_removal = min(min_removal, window_sum)
-
-print(total - min_removal)
+```
+6 2
+1 2 3 1 6 10
 ```
 
+* Keep: \[2, 3], skip 1, keep: \[6, 10] → Total = 21 ✅
+
 ---
 
-This approach efficiently finds the best block to remove, ensuring maximum remaining score while abiding by the rule of removing only one contiguous segment of length up to `k`.
+## ⏱ Time and Space Complexity
+
+* **Time Complexity**: `O(n * k)`
+* **Space Complexity**: `O(n * k)` (can be optimized to `O(k)`)
 
 ---
 ---
