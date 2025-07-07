@@ -189,6 +189,202 @@ public class HurdleMaxScore {
 * **Space Complexity**: `O(n * k)` (can be optimized to `O(k)`)
 
 ---
+Let's **explain the line-by-line working of the DP solution** for the **Paris Olympics Hurdle Challenge** with:
+
+* **Visual diagrams**
+* **Line-by-line walkthrough**
+* **Sample Input:**
+
+```
+n = 6, k = 2
+Hurdles = [1, 2, 3, 1, 6, 10]
+```
+
+---
+
+## 🧠 Problem Recap
+
+* You can **keep at most `k` consecutive hurdles**.
+* You want to **maximize** the **total score** from selected hurdles.
+* You can **skip** hurdles to **reset the streak**.
+
+---
+
+## ✅ Line-by-Line Code Explanation
+
+```java
+Scanner sc = new Scanner(System.in);
+int n = sc.nextInt();         // Number of hurdles
+int k = sc.nextInt();         // Max allowed consecutive hurdles
+int[] hurdles = new int[n];   // Array to store hurdle scores
+```
+
+* `n = 6`
+* `k = 2`
+* Input: 1 2 3 1 6 10
+
+```java
+for (int i = 0; i < n; i++) {
+    hurdles[i] = sc.nextInt();  // Read each hurdle score
+}
+```
+
+Now `hurdles = [1, 2, 3, 1, 6, 10]`
+
+---
+
+```java
+long[][] dp = new long[n + 1][k + 1];
+```
+
+* `dp[i][j]` represents the **maximum score possible after processing the first `i` hurdles**, where the last `j` hurdles are selected consecutively.
+
+* Dimensions:
+
+  * `dp[0...n][0...k]`
+  * i.e., `dp[0][0], dp[0][1], ..., dp[n][k]`
+
+---
+
+```java
+for (int i = 0; i <= n; i++) {
+    Arrays.fill(dp[i], Long.MIN_VALUE);
+}
+```
+
+* Initially, all states are invalid (worst case), except the base case.
+
+```java
+dp[0][0] = 0;
+```
+
+### 🟢 Base Case:
+
+* At the **start**, you’ve processed **0 hurdles**, and the streak is **0**.
+* So the best score = **0**.
+
+```
+dp[0][0] = 0
+```
+
+---
+
+### 💡 DP Transition
+
+```java
+for (int i = 0; i < n; i++) {          // i = current hurdle index
+    for (int j = 0; j <= k; j++) {     // j = current streak length
+```
+
+We loop through each position and possible streak length.
+
+---
+
+#### 📘 Decision 1: Skip the hurdle
+
+```java
+dp[i + 1][0] = Math.max(dp[i + 1][0], dp[i][j]);
+```
+
+* If you **skip** hurdle `i`, streak resets to 0.
+* The max score is updated by carrying forward the previous score.
+
+#### 📘 Decision 2: Keep the hurdle (if streak < k)
+
+```java
+if (j < k) {
+    dp[i + 1][j + 1] = Math.max(dp[i + 1][j + 1], dp[i][j] + hurdles[i]);
+}
+```
+
+* If current streak `j < k`, you can keep the hurdle.
+* New score = previous score + current hurdle value.
+* Update next state `dp[i+1][j+1]`.
+
+---
+
+## 🧮 Let's Visualize With Sample Input
+
+```
+Input: 6 2
+Hurdles: [1, 2, 3, 1, 6, 10]
+```
+
+We process hurdle-by-hurdle. We'll track only the best values for `j = 0, 1, 2` at each step.
+
+---
+
+### 🧾 Step-by-Step Table (Partial):
+
+| Hurdle Index `i` | Current Hurdle | Streak j | dp\[i]\[j] | Action               | dp\[i+1]\[j']  |
+| ---------------- | -------------- | -------- | ---------- | -------------------- | -------------- |
+| 0                | 1              | 0        | 0          | Skip                 | dp\[1]\[0] = 0 |
+|                  |                |          |            | Take                 | dp\[1]\[1] = 1 |
+| 1                | 2              | 0        | 0          | Skip                 | dp\[2]\[0] = 0 |
+|                  |                |          |            | Take                 | dp\[2]\[1] = 2 |
+| 1                | 2              | 1        | 1          | Skip                 | dp\[2]\[0] = 1 |
+|                  |                |          |            | Take                 | dp\[2]\[2] = 3 |
+| 2                | 3              | 0        | 1          | Skip                 | dp\[3]\[0] = 1 |
+|                  |                |          |            | Take                 | dp\[3]\[1] = 4 |
+| 2                | 3              | 1        | 2          | Skip                 | dp\[3]\[0] = 2 |
+|                  |                |          |            | Take                 | dp\[3]\[2] = 5 |
+| 2                | 3              | 2        | 3          | Skip                 | dp\[3]\[0] = 3 |
+|                  |                |          |            | ✖ Too Long → No Take |                |
+
+You continue until `i = 5`.
+
+---
+
+## 🏁 Final Step
+
+```java
+long maxScore = 0;
+for (int j = 0; j <= k; j++) {
+    maxScore = Math.max(maxScore, dp[n][j]);
+}
+System.out.println(maxScore);
+```
+
+* Scan through all final states `dp[n][j]` where `j ∈ [0, k]`
+* Return the **maximum score achieved**
+
+---
+
+## ✅ Final Output:
+
+For this input:
+
+```
+6 2
+1
+2
+3
+1
+6
+10
+```
+
+* Optimal picks: \[2, 3], skip 1, \[6, 10] → 2 + 3 + 6 + 10 = **21**
+
+```
+Output: 21
+```
+
+---
+
+## 📊 Summary Diagram
+
+```plaintext
+[1]   [2]   [3]   [1]   [6]   [10]
+ ↑     ↑     ↑    ↑     ↑     ↑
+Skip  Keep  Keep Skip  Keep  Keep
+      (Streak=2)      (Streak=2)
+```
+
+* You break before streak exceeds `k=2`
+* Maximize score with valid streaks
+
+---
 ---
 
 # 2. Help Mike Get Rich
