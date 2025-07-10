@@ -297,6 +297,34 @@ The cell with the **most incoming edges** is **cell 22**, with **5 entries**.
 ---
 ## ⭐ Code
 ```Java
-// Code Here
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int N = sc.nextInt();
+        int[] edge = new int[N];
+        for (int i = 0; i < N; i++) {
+            edge[i] = sc.nextInt();
+        }
+
+        int[] count = new int[N];  // count of incoming edges
+        for (int i = 0; i < N; i++) {
+            if (edge[i] != -1) {
+                count[edge[i]]++;
+            }
+        }
+
+        int maxEntry = 0;
+        for (int c : count) {
+            if (c > maxEntry) {
+                maxEntry = c;
+            }
+        }
+
+        System.out.println(maxEntry);
+    }
+}
 ```
 ---
