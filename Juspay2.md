@@ -1,4 +1,4 @@
-# 🧩 Problem: 1. Maximum Weight Node in a Maze
+# 🧩 Problem Description: 1. Maximum Weight Node in a Maze
 
 You are given a **maze with N cells**.
 Each cell may have **multiple entry points**, but **at most one exit** — that is, entry/exit points are **unidirectional** like valves.
@@ -65,9 +65,7 @@ Example:
 
 
 ---
-# 🧩 Problem: 2. Nearest Meeting Cell
-
-## 🧩 **Problem Description**
+# 🧩 Problem Description: 2. Nearest Meeting Cell
 
 You are given a **maze with N cells**.
 Each cell has **at most one exit** but may have **multiple entry points** (like one-way valves).
@@ -118,3 +116,76 @@ Print the index of the **Nearest Meeting Cell**. Print `-1` if no such cell exis
 ```
 4
 ```
+![009571ee-adcc-4fe8-ba5d-9fda2c6b9553_1652382460 7890408](https://github.com/user-attachments/assets/b6967ab4-135a-4837-838c-633a9d965f7f)
+
+---
+
+# 🧩 **Problem Description: 3. Maximum Entry Points in Maze**
+
+You are given a **maze with N cells**, represented by a one-way system of doors (unidirectional exits only).
+Each cell can have:
+
+* **At most one outgoing edge** (exit),
+* But **multiple incoming edges** (entry points).
+
+The maze is represented using an array `edge[]`, where:
+
+* `edge[i] = x` means there's a **direct path from cell i → x**.
+* `edge[i] = -1` means cell `i` has **no exit**.
+
+---
+
+### 🎯 **Objective**
+
+You are required to find the **maximum number of entry points** (incoming edges) for **any single cell** in the maze.
+
+---
+
+## 🧾 **Input Format**
+
+* First line: Integer `N` — total number of cells.
+* Second line: `N` integers representing `edge[]` array.
+
+---
+
+## 📤 **Output Format**
+
+* A single integer: the **maximum entry points** (incoming edges) among all cells.
+
+---
+
+## 🧪 **Sample Input**
+
+```
+23
+4 4 1 4 13 8 8 8 0 8 14 9 5 11 -1 10 15 22 22 22 22 22 21
+```
+
+---
+
+## ✅ **Sample Output**
+
+```
+5
+```
+
+---
+
+## 🧠 **Explanation of Sample**
+
+Let’s count how many times each cell appears in the `edge[]` array:
+
+* For example:
+
+  * Cell `4` is targeted by edge\[0], edge\[1], and edge\[3] → 3 entries
+  * Cell `22` is targeted by edge\[17], edge\[18], edge\[19], edge\[20], edge\[21] → 5 entries
+
+The cell with the **most incoming edges** is **cell 22**, with **5 entries**.
+
+✅ So, the answer is `5`.
+
+---
+![009571ee-adcc-4fe8-ba5d-9fda2c6b9553_1652382460 7890408](https://github.com/user-attachments/assets/b6967ab4-135a-4837-838c-633a9d965f7f)
+
+---
+
