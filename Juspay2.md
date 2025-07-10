@@ -63,7 +63,51 @@ Example:
 
 ![009571ee-adcc-4fe8-ba5d-9fda2c6b9553_1652382460 7890408](https://github.com/user-attachments/assets/b6967ab4-135a-4837-838c-633a9d965f7f)
 
+---
+## ⭐ Code
 
+```Java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Input number of cells
+        int N = sc.nextInt();
+
+        // Input edges
+        int[] edge = new int[N];
+        for (int i = 0; i < N; i++) {
+            edge[i] = sc.nextInt();
+        }
+
+        int result = findMaxWeightNode(edge);
+        System.out.println(result);
+    }
+
+    public static int findMaxWeightNode(int[] edge) {
+        int n = edge.length;
+        int[] weight = new int[n];
+        int ans = Integer.MIN_VALUE;
+        int result = -1;
+
+        for (int i = 0; i < n; i++) {
+            int dest = edge[i];
+            if (dest != -1) {
+                weight[dest] += i;
+                if (weight[dest] > ans || (weight[dest] == ans && dest > result)) {
+                    ans = weight[dest];
+                    result = dest;
+                }
+            }
+        }
+
+        return result;
+    }
+}
+
+```
 ---
 # 🧩 Problem Description: 2. Nearest Meeting Cell
 
@@ -117,6 +161,69 @@ Print the index of the **Nearest Meeting Cell**. Print `-1` if no such cell exis
 4
 ```
 ![009571ee-adcc-4fe8-ba5d-9fda2c6b9553_1652382460 7890408](https://github.com/user-attachments/assets/b6967ab4-135a-4837-838c-633a9d965f7f)
+
+---
+## ⭐ Code
+
+```Java
+import java.util.*;
+
+public class Main {
+
+    public static int[] getDistances(int start, int[] edge) {
+        int n = edge.length;
+        int[] dist = new int[n];
+        Arrays.fill(dist, -1);
+        Set<Integer> visited = new HashSet<>();
+
+        int curr = start, d = 0;
+        while (curr != -1 && !visited.contains(curr)) {
+            dist[curr] = d;
+            visited.add(curr);
+            curr = edge[curr];
+            d++;
+        }
+
+        return dist;
+    }
+
+    public static int nearestMeetingCell(int[] edge, int c1, int c2) {
+        int[] dist1 = getDistances(c1, edge);
+        int[] dist2 = getDistances(c2, edge);
+
+        int minDist = Integer.MAX_VALUE;
+        int result = -1;
+
+        for (int i = 0; i < edge.length; i++) {
+            if (dist1[i] != -1 && dist2[i] != -1) {
+                int maxD = Math.max(dist1[i], dist2[i]);
+                if (maxD < minDist || (maxD == minDist && i < result)) {
+                    minDist = maxD;
+                    result = i;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int n = sc.nextInt();
+        int[] edge = new int[n];
+        for (int i = 0; i < n; i++) edge[i] = sc.nextInt();
+
+        int c1 = sc.nextInt();
+        int c2 = sc.nextInt();
+
+        int res = nearestMeetingCell(edge, c1, c2);
+        System.out.println(res);
+    }
+}
+
+
+```
 
 ---
 
@@ -188,4 +295,8 @@ The cell with the **most incoming edges** is **cell 22**, with **5 entries**.
 ![009571ee-adcc-4fe8-ba5d-9fda2c6b9553_1652382460 7890408](https://github.com/user-attachments/assets/b6967ab4-135a-4837-838c-633a9d965f7f)
 
 ---
-
+## ⭐ Code
+```Java
+// Code Here
+```
+---
