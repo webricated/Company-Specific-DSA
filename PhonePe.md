@@ -169,7 +169,65 @@ public class HurdleMaxScore {
     }
 }
 ```
+## Woking Code
 
+```Java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        // Read n and the list of numbers
+        int n = Integer.parseInt(br.readLine().trim());
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        List<Long> initial = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            initial.add(Long.parseLong(st.nextToken()));
+        }
+
+        // Sort ascending so that each time Harsh can split off the smallest element
+        Collections.sort(initial);
+
+        // We'll use a queue to simulate the rounds:
+        // each element is a subsequence that Pranay will sum
+        Queue<List<Long>> q = new ArrayDeque<>();
+        q.add(initial);
+
+        long totalPoints = 0;
+
+        while (!q.isEmpty()) {
+            List<Long> curr = q.poll();
+
+            // Pranay sums up the current list
+            long sum = 0;
+            for (long x : curr) sum += x;
+            totalPoints += sum;
+
+            // Harsh’s turn: if more than one element, split it
+            int size = curr.size();
+            if (size > 1) {
+                if (size == 2) {
+                    // Only one way to split two elements
+                    q.add(Collections.singletonList(curr.get(0))); // subsequence [first]
+                    q.add(Collections.singletonList(curr.get(1))); // subsequence [second]
+                } else {
+                    // Split off the smallest element to maximize future sums
+                    List<Long> splitOff = Collections.singletonList(curr.get(0));
+                    List<Long> rest = curr.subList(1, size); // the other n-1 elements
+                    // Harsh gives 'rest' first, then 'splitOff'
+                    q.add(new ArrayList<>(rest));
+                    q.add(new ArrayList<>(splitOff));
+                }
+            }
+            // If size == 1, Harsh throws it out (we simply do nothing further)
+        }
+
+        // Print the total points Pranay accumulated
+        System.out.println(totalPoints);
+    }
+}
+```
 ---
 
 ## 🧮 Dry Run: Sample Input 0
