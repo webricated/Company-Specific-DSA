@@ -26,7 +26,7 @@
 > 24. Parking Lot Arrangement  
 
 
-# 1. Cloud Network Bandwidth Pricing
+# 12. Cloud Network Bandwidth Pricing
 
 ### Background:
 
@@ -65,12 +65,11 @@ There are two types of events:
 
 ### Function Description:
 > Complete the **solve** function in the editor below. It has the following parameter(s):
-```java
-Name         Type          Description
--------------------------------------------------------
-q            INTEGER       Number of events
-a            INTEGER[][]   2D array containing event details in chronological order
-```
+
+| Name | Type | Description |
+|------|------|-------------|
+| q    | INTEGER | Number of events |
+| a    | INTEGER[][] | 2D array containing event details in chronological order |
 
 #### Returns:
 
@@ -104,60 +103,206 @@ Each line i of the q subsequent lines (where 0 ≤ i < q) contains 4 space-separ
 | 3  <br> 1 1 2 2 <br> 1 1 4 2 <br> 2 1 4 0                                                                     | 6      | 2 1 4 0 : <br>Path from 1 to 4 is: 1→2→4. So, 4+2 = **6**.                                                                                                                                                                                                                                                                  |
 
 ---
-
+## Code
 ```Java
 //Cloud Network Bandwidth Pricing - Juspay (12 July 2025) Round 1: Coding
+import java.io.*;
+import java.util.*;
+import java.lang.Math;
+import java.util.stream.Collectors.joining;
+import java.util.stream.Collectors.toList;
 
-public static int solve(int q, List<List<Integer>> a) {
-    Map<Long, Long> edgeFees = new HashMap<>();
-    long totalCost = 0;
+public class Solution {
 
-    for (int i = 0; i < q; i++) {
-        List<Integer> event = a.get(i);
-        int type = event.get(0);
-        int u = event.get(1);
-        int v = event.get(2);
-        int x = event.get(3);
+    public static int solve(int q, List < List < Integer >> a) {
+        Map < Long, Long > edgeFees = new HashMap < > ();
+        long totalCost = 0;
 
-        if (type == 1) {
-            // Fee update along path u -> v
-            while (u != v) {
-                if (u > v) {
-                    long key = getKey(u);
-                    edgeFees.put(key, edgeFees.getOrDefault(key, 0L) + x);
-                    u /= 2;
-                } else {
-                    long key = getKey(v);
-                    edgeFees.put(key, edgeFees.getOrDefault(key, 0L) + x);
-                    v /= 2;
+        for(int i = 0; i < q; i++) {
+            List < Integer > event = a.get(i);
+            int type = event.get(0);
+            int u = event.get(1);
+            int v = event.get(2);
+            int x = event.get(3);
+
+            if(type == 1) {
+                // Fee update along path u -> v
+                while(u != v) {
+                    if(u > v) {
+                        long key = getKey(u);
+                        edgeFees.put(key, edgeFees.getOrDefault(key, 0 L) + x);
+                        u /= 2;
+                    } else {
+                        long key = getKey(v);
+                        edgeFees.put(key, edgeFees.getOrDefault(key, 0 L) + x);
+                        v /= 2;
+                    }
                 }
-            }
-        } else if (type == 2) {
-            // Data transfer cost along path u -> v
-            long cost = 0;
-            while (u != v) {
-                if (u > v) {
-                    long key = getKey(u);
-                    cost += edgeFees.getOrDefault(key, 0L);
-                    u /= 2;
-                } else {
-                    long key = getKey(v);
-                    cost += edgeFees.getOrDefault(key, 0L);
-                    v /= 2;
+            } else if(type == 2) {
+                // Data transfer cost along path u -> v
+                long cost = 0;
+                while(u != v) {
+                    if(u > v) {
+                        long key = getKey(u);
+                        cost += edgeFees.getOrDefault(key, 0 L);
+                        u /= 2;
+                    } else {
+                        long key = getKey(v);
+                        cost += edgeFees.getOrDefault(key, 0 L);
+                        v /= 2;
+                    }
                 }
+                totalCost += cost;
             }
-            totalCost += cost;
         }
+
+        return (int) totalCost;
     }
 
-    return (int)totalCost;
+    // Helper to uniquely identify an edge between a node and its parent
+    private static long getKey(int node) {
+        int parent = node / 2;
+        int min = Math.min(node, parent);
+        int max = Math.max(node, parent);
+        return (((long) min) << 32) | (long) max;
+    }
+
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+
+        int q = Integer.parseInt(scan.nextLine()
+            .trim());
+
+        List < List < Integer >> a = new ArrayList < > ();
+        for(int i = 0; i < q; i++) {
+            a.add(
+                Arrays.asList(scan.nextLine()
+                    .trim()
+                    .split(" "))
+                .stream()
+                .map(s - > Integer.parseInt(s))
+                .collect(Collectors.toList())
+            );
+        }
+
+        int result = solve(q, a);
+        System.out.println(result);
+    }
+}
+```
+---
+# 7. Factory Maintenance Scheduling
+
+You are the manager of a large factory with various machines, each of which requires periodic maintenance to keep running efficiently. There is a production target, measured in units of output that you need to achieve, and each machine contributes to the total output.
+
+You have `n` machines in the factory. Each machine can produce `o_i` units of output before it requires maintenance, which takes `c_i` days to complete, meaning the next time you can use this machine is day `x + c_i` if your current day is `x`. During maintenance, the machine cannot contribute to production. On each day, you can use all machines that are not currently under maintenance. If all machines are under maintenance on a given day, no output is produced for that day.
+
+Initially, all machines are available for production. The goal is to determine how many days it will take to meet or exceed the required production target, using all available machines optimally.
+
+---
+
+## Function Description
+
+Complete the `solve` function in the editor below. It has the following parameter(s):
+
+| Name | Type | Description |
+|------|------|-------------|
+| P    | INTEGER | Total production target |
+| n    | INTEGER | Number of machines |
+| o    | INTEGER ARRAY | Output units each machine can produce before requiring maintenance |
+| c    | INTEGER ARRAY | Number of days each machine takes for maintenance after producing its output |
+
+---
+
+## Constraints
+
+- 1 ≤ P ≤ 2×10⁵  
+- 1 ≤ n ≤ 2×10⁵  
+- 1 ≤ o[i] ≤ 2×10⁵  
+- 1 ≤ c[i] ≤ 2×10⁵  
+
+---
+
+## Input Format for Debugging
+
+- The first line contains an integer, `P`, denoting the total production target.
+- The next line contains an integer, `n`, denoting the number of machines.
+- Each of the next `n` lines contains an integer describing `o[i]`.
+- Each of the next `n` lines contains an integer describing `c[i]`.
+
+---
+
+## Sample Testcases
+
+| Input                                                                                                                                                     | Output | Output Description                                                                                                                                                                                                                                                                                      |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 24 <br> 6 <br> 3 <br> 3 <br> 2 <br> 1 <br> 2 <br> 3 <br> 9 <br> 10 <br> 2 <br> 8 <br> 6 <br> 9                                                                | 9      | Use all machines on day 1. Total target = 14. <br>For 3rd, 5th, 7th and 9th day, use machine 3. So, 14+8=22. <br>On day 7, machine 5 can be used. It gives 22+2=24. <br>There are many other combinations possible, but the minimum days needed are **9**.                                               |
+| 3 <br> 1 <br> 1 <br> 1                                                                                                                                    | 3      | We can use the machine on each day. So total = **3** days.                                                                                                                                                                                                                                               |
+| 90000 <br> 2 <br> 200000 <br> 200000 <br> 1 <br> 1                                                                                                         | 1      | On **day 1** itself, the target gets exceeded.                                                                                                                                                                                                                                                           |
+
+---
+
+## Code
+
+```Java
+
+// Factory Maintenance Scheduling - Juspay (12 July 2025) Round 1: Coding
+
+import java.util.*;
+
+public class Solution {
+    public static int solve(int p, int n, List<Integer> o, List<Integer> c) {
+        int days = 0;
+        int total_output = 0;
+
+        // Stores next available day for each machine
+        int[] available = new int[n];
+        Arrays.fill(available, 1); // machines are available on day 1
+
+        while (total_output < p) {
+            days++;
+
+            // Find the best machine available today
+            int bestMachine = -1;
+            int maxOutput = -1;
+
+            for (int i = 0; i < n; i++) {
+                if (available[i] <= days && o.get(i) > maxOutput) {
+                    maxOutput = o.get(i);
+                    bestMachine = i;
+                }
+            }
+
+            // If no machine is available, skip to next day
+            if (bestMachine == -1) continue;
+
+            // Use the best machine
+            total_output += o.get(bestMachine);
+            available[bestMachine] = days + c.get(bestMachine); // update its next availability
+        }
+
+        return days;
+    }
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+
+        int p = Integer.parseInt(scan.nextLine().trim());
+        int n = Integer.parseInt(scan.nextLine().trim());
+
+        List<Integer> o = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            o.add(Integer.parseInt(scan.nextLine().trim()));
+        }
+
+        List<Integer> c = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            c.add(Integer.parseInt(scan.nextLine().trim()));
+        }
+
+        System.out.println(solve(p, n, o, c));
+    }
 }
 
-// Helper to uniquely identify an edge between a node and its parent
-private static long getKey(int node) {
-    int parent = node / 2;
-    int min = Math.min(node, parent);
-    int max = Math.max(node, parent);
-    return (((long)min) << 32) | (long)max;
-}
 ```
