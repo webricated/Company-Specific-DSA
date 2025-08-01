@@ -340,7 +340,7 @@ The traffic authority will introduce a series of changes:
 
   * `1 x y t`: describes a toll update where all roads on the shortest path between hubs x and y increase their toll by t units.
   * `2 x y 0`: represents a travel event where a commuter moves from hub x to hub y.
-    They are given in the form of a 2D array of `q` rows and `4` columns.
+They are given in the form of a 2D array of `q` rows and `4` columns.
 
 ---
 
@@ -380,9 +380,9 @@ Complete the `solve` function in the editor below. It has the following paramete
 
 | Input                                                                                | Output | Output Description                                                                                                                                                                                                        |
 | ------------------------------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `3`<br>`1 1 2 2`<br>`1 1 4 2`<br>`2 1 4 0`                                           | `6`    | Query: 2 1 4 0<br>Path from 1 to 4 is: 1 → 2 → 4<br>So, fees is 4 + 2 = 6                                                                                                                                                 |
-| `5`<br>`1 1 4 2`<br>`1 2 7 2`<br>`2 4 7 0`<br>`2 5 7 0`<br>`2 6 7 0`                 | `10`   | 1. 2 4 7 0:<br>Path: 4 → 2 → 1 → 3 → 7<br>Cost: 4→2 = 2, 2→1 = 4, 1→3 = 2, 3→7 = 2<br>Total = 2 + 4 + 2 + 2 = 10                                                                                                          |
-| `7`<br>`1 3 4 20`<br>`1 4 1 22`<br>`1 3 6 20`<br>`2 4 3 0`<br>`2 3 7 0`<br>`2 2 4 0` | `86`   | 1. 2 4 3 0:<br>Path: 4→2→1→3<br>Cost: 4→2 = 22, 2→1 = 22, 1→3 = 20 → Total = 64<br>2. 2 3 7 0: Path has no cost → 0<br>3. 2 2 4 0: Cost: 2→4 = 20 (from 1st), +2 (from 2nd) → Total = 22<br>Final Total: 64 + 0 + 22 = 86 |
+| `3`<br>`1 1 2`<br>`2`<br>`1 1 4`<br>`2`<br>`2 1 4`<br>`0`                                           | `6`    | Query: 2 1 4 0<br>Path from 1 to 4 is: 1 → 2 → 4<br>So, fees is 4 + 2 = 6                                                                                                                                                 |
+| `5`<br>`1 1 4`<br>`2`<br>`1 2 7`<br>`2`<br>`2 4 7`<br>`0`<br>`2 5 7`<br>`0`<br>`2 6 7`<br>`0`                 | `20`   | 1. 2 4 7 0:<br>For 4 to 7, Path: 4 → 2 → 1 → 3 → 7<br>Cost for 4→2 is 2<br>Cost for 2→1 is 4<br>Cost for 1→3 is 2<br>Cost for 3→7 is 2<br>Total fess = 2 + 4 + 2 + 2 = 10                                                                                                          |
+| `7`<br>`1 3 4`<br>`20`<br>`1 4 1`<br>`2`<br>`1 3 6`<br>`8`<br>`2 4 3`<br>`0`<br>`1 6 1`<br>`40`<br>`2 3 7`<br>`0`<br>`2 2 4`<br>`0` | `86`   | 1. 2 4 3 0:<br>Path: 4→2→1→3<br>Cost: 4→2 = 22, 2→1 = 22, 1→3 = 20 → Total = 64<br>2. 2 3 7 0: Path has no cost → 0<br>3. 2 2 4 0: Cost: 2→4 = 20 (from 1st), +2 (from 2nd) → Total = 22<br>Final Total: 64 + 0 + 22 = 86 |
 
 ---
 
