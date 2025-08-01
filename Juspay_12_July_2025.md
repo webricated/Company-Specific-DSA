@@ -306,3 +306,148 @@ public class Solution {
 }
 
 ```
+---
+Certainly! Below is the fully formatted version in **Markdown**, preserving the original **table format for sample testcases and outputs**, and keeping everything clean and structured:
+
+---
+
+# 1. Smart City Traffic Toll System
+
+### Background:
+
+In a **smart city**, there are an infinite number of **traffic control hubs** numbered with positive integers starting from 1. Each hub is connected by smart roads in a unique tree-like structure:
+
+> 1. There is a direct, bidirectional road between hub i and 2i.
+> 2. Another direct road exists between hub `i` and `2*i + 1`.
+
+Given this structure, there is always a unique shortest path between any two traffic control hubs.
+
+Initially, passing through any road is toll-free. However, to optimize traffic flow and manage congestion, the city traffic authority occasionally imposes toll fees on certain roads along specific paths.
+
+The traffic authority will introduce a series of changes:
+
+---
+**1. Toll Fee Update:** An update described by integers `x`, `y`, and `t` imposes a toll of `t` units on all roads along the shortest path from hub `y` to hub `x`.
+
+**2. Travel Cost Calculation:** A commuter travels from hub `x` to hub `y` using the shortest path, and you need to calculate the total toll fees they incur.
+
+---
+
+### **Input:**
+
+* The first line contains an integer `q (1 ≤ q ≤ 1,000)`, representing the number of events.
+* The next `q` lines contain details of the events:
+
+  * `1 x y t`: describes a toll update where all roads on the shortest path between hubs x and y increase their toll by t units.
+  * `2 x y 0`: represents a travel event where a commuter moves from hub x to hub y.
+    They are given in the form of a 2D array of `q` rows and `4` columns.
+
+---
+
+### **Output:**
+
+For each travel event `(2 x y 0)`, add to a sum the total cost for the trip and return the sum.
+
+---
+
+### **Function Description:**
+
+Complete the `solve` function in the editor below. It has the following parameter(s):
+
+| Name | Type             | Description           |
+| ---- | ---------------- | --------------------- |
+| q    | INTEGER          | Number of events      |
+| a    | INTEGER 2D ARRAY | Details of the events |
+
+---
+
+### **Constraints:**
+
+* $1 \leq q \leq 10^5$
+* $1 \leq a[i][j] \leq 10^5$
+
+---
+
+### **Input format for debugging:**
+
+* The first line contains an integer `q`, denoting the number of rows in `a`.
+* The next line contains an integer `4`, denoting the number of columns in `a`.
+* Each line `i` of the `q` subsequent lines (where `0 ≤ i < q`) contains 4 space-separated integers each describing the row `a[i]`.
+
+---
+
+### **Sample Testcases:**
+
+| Input                                                                                | Output | Output Description                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `3`<br>`1 1 2 2`<br>`1 1 4 2`<br>`2 1 4 0`                                           | `6`    | Query: 2 1 4 0<br>Path from 1 to 4 is: 1 → 2 → 4<br>So, fees is 4 + 2 = 6                                                                                                                                                 |
+| `5`<br>`1 1 4 2`<br>`1 2 7 2`<br>`2 4 7 0`<br>`2 5 7 0`<br>`2 6 7 0`                 | `10`   | 1. 2 4 7 0:<br>Path: 4 → 2 → 1 → 3 → 7<br>Cost: 4→2 = 2, 2→1 = 4, 1→3 = 2, 3→7 = 2<br>Total = 2 + 4 + 2 + 2 = 10                                                                                                          |
+| `7`<br>`1 3 4 20`<br>`1 4 1 22`<br>`1 3 6 20`<br>`2 4 3 0`<br>`2 3 7 0`<br>`2 2 4 0` | `86`   | 1. 2 4 3 0:<br>Path: 4→2→1→3<br>Cost: 4→2 = 22, 2→1 = 22, 1→3 = 20 → Total = 64<br>2. 2 3 7 0: Path has no cost → 0<br>3. 2 2 4 0: Cost: 2→4 = 20 (from 1st), +2 (from 2nd) → Total = 22<br>Final Total: 64 + 0 + 22 = 86 |
+
+---
+
+```
+import java.util.*;
+
+public class SmartCityTrafficToll {
+    static Map<String, Long> tollMap = new HashMap<>();
+
+    // Helper to generate a consistent key for edge (parent-child)
+    static String edgeKey(int u, int v) {
+        int min = Math.min(u, v);
+        int max = Math.max(u, v);
+        return min + "-" + max;
+    }
+
+    // Toll fee update: Add t to every edge in the path from x to y
+    static void updateToll(int x, int y, int t) {
+        while (x != y) {
+            if (x > y) {
+                String key = edgeKey(x, x / 2);
+                tollMap.put(key, tollMap.getOrDefault(key, 0L) + t);
+                x /= 2;
+            } else {
+                String key = edgeKey(y, y / 2);
+                tollMap.put(key, tollMap.getOrDefault(key, 0L) + t);
+                y /= 2;
+            }
+        }
+    }
+
+    // Travel cost calculation: Sum tolls in the path from x to y
+    static long queryCost(int x, int y) {
+        long cost = 0;
+        while (x != y) {
+            if (x > y) {
+                String key = edgeKey(x, x / 2);
+                cost += tollMap.getOrDefault(key, 0L);
+                x /= 2;
+            } else {
+                String key = edgeKey(y, y / 2);
+                cost += tollMap.getOrDefault(key, 0L);
+                y /= 2;
+            }
+        }
+        return cost;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int q = sc.nextInt(); // number of events
+
+        for (int i = 0; i < q; i++) {
+            int type = sc.nextInt();
+            int x = sc.nextInt();
+            int y = sc.nextInt();
+
+            if (type == 1) {
+                int t = sc.nextInt();
+                updateToll(x, y, t);
+            } else if (type == 2) {
+                System.out.println(queryCost(x, y));
+            }
+        }
+        sc.close();
+    }
+}
+```
