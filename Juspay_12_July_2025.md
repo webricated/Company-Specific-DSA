@@ -509,7 +509,7 @@ The function must return an **INTEGER** denoting the number of viewpoints (leaf 
 
 | Input | Output | Output Description                                                |
 | ----- | ------ | ----------------------------------------------------------------- |
-| `7`<br>`1`<br>`6`<br>`1`<br>`0`<br>`1`<br>`1`<br>`0`<br>`0`<br>`0`<br>`1`<br>`1`<br>`12`<br>`13`<br>`24`<br>`25`<br>`36`<br>`37`     |    `2`    | The number of outermost towers (leaf nodes) he can safely inspect |
+| `7`<br>`1`<br>`6`<br>`1`<br>`0`<br>`1`<br>`1`<br>`0`<br>`0`<br>`0`<br>`1`<br>`1`<br>`1 2`<br>`1 3`<br>`2 4`<br>`2 5`<br>`3 6`<br>`3 7`     |    `2`    | The number of outermost towers (leaf nodes) he can safely inspect |
 |`5`<br>`2`<br>`4`<br>`1`<br>`1`<br>`0`<br>`1`<br>`1`<br>`1 2`<br>`2 3`<br>`3 4`<br>`4 5`|    `1`   | The number of outermost towers (leaf nodes) he can safely inspect |
 
 
