@@ -452,7 +452,7 @@ public class SmartCityTrafficToll {
 ```
 ---
 
-# 11. Network Technician’s Mission
+# 11. Network Technician’s Mission ❌2️⃣
 
 In the city of Techville, a network technician named Sam is tasked with inspecting a newly established network of communication towers. The network is structured as a rooted tree with **n** towers, with the main control tower located at **node 1**. This control tower serves as the central hub for all communications.
 
@@ -597,7 +597,7 @@ public class Solution {
 ```
 ---
 
-# 21. Power Grid Management  
+# 21. Power Grid Management  ❌2️⃣
 
 ### Background:
 
