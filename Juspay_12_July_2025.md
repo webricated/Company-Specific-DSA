@@ -23,7 +23,9 @@
 > 21. Power Grid Management  
 > 22. Student Seat Arrangement  
 > 23. The Medieval Market Problem  
-> 24. Parking Lot Arrangement  
+> 24. Parking Lot Arrangement
+> 25. Garden Irrigation Management
+> 26. Drone Recharging Stations on a Highway
 
 
 # 12. Cloud Network Bandwidth Pricing
@@ -589,6 +591,132 @@ public class Solution {
         }
 
         int result = safeViewPoints(N, M, k, Arr1, Arr2);
+        System.out.println(result);
+    }
+}
+```
+---
+
+# 21. Power Grid Management  
+
+### Background:
+
+
+___
+
+### Code:
+```Java
+import java.io.*;
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class Solution {
+    public static int solve(int n, int r, int m, List<List<Integer>> edges, int q, List<List<Integer>> queries) {
+        // Adjacency list to represent the tree
+        Map<Integer, List<int[]>> graph = new HashMap<>();
+        Map<String, Integer> edgeMap = new HashMap<>();
+
+        // Build the tree and edgeMap
+        for (List<Integer> edge : edges) {
+            int u = edge.get(0);
+            int v = edge.get(1);
+            int w = edge.get(2);
+
+            graph.computeIfAbsent(u, k -> new ArrayList<>()).add(new int[]{v, w});
+            graph.computeIfAbsent(v, k -> new ArrayList<>()).add(new int[]{u, w});
+
+            // Store bidirectional edge with cost
+            edgeMap.put(u + "-" + v, w);
+            edgeMap.put(v + "-" + u, w);
+        }
+
+        int total = 0;
+
+        for (List<Integer> query : queries) {
+            int type = query.get(0);
+
+            if (type == 1) {
+                int src = query.get(1);
+                int dest = query.get(2);
+
+                // Do DFS to get the transmission cost between src and dest
+                Set<Integer> visited = new HashSet<>();
+                int cost = dfs(src, dest, graph, edgeMap, visited, 0);
+                total += cost;
+
+            } else if (type == 2) {
+                int u = query.get(1);
+                int v = query.get(2);
+                int newCost = query.get(3);
+
+                // Update edge cost in edgeMap
+                edgeMap.put(u + "-" + v, newCost);
+                edgeMap.put(v + "-" + u, newCost);
+
+                // Also update in adjacency list
+                updateEdgeCost(graph, u, v, newCost);
+                updateEdgeCost(graph, v, u, newCost);
+            }
+        }
+
+        return total;
+    }
+
+    // DFS to find the cost from src to dest
+    private static int dfs(int current, int target, Map<Integer, List<int[]>> graph,
+                           Map<String, Integer> edgeMap, Set<Integer> visited, int cost) {
+        if (current == target) return cost;
+
+        visited.add(current);
+
+        for (int[] neighbor : graph.get(current)) {
+            int nextNode = neighbor[0];
+            if (!visited.contains(nextNode)) {
+                int newCost = cost + edgeMap.get(current + "-" + nextNode);
+                int result = dfs(nextNode, target, graph, edgeMap, visited, newCost);
+                if (result != -1) return result;
+            }
+        }
+
+        return -1;
+    }
+
+    // Update the cost of edge in graph adjacency list
+    private static void updateEdgeCost(Map<Integer, List<int[]>> graph, int u, int v, int newCost) {
+        for (int[] edge : graph.get(u)) {
+            if (edge[0] == v) {
+                edge[1] = newCost;
+                break;
+            }
+        }
+    }
+
+    // Already provided main method
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+
+        int N = Integer.parseInt(scan.nextLine().trim());
+        int R = Integer.parseInt(scan.nextLine().trim());
+        int M = Integer.parseInt(scan.nextLine().trim());
+
+        List<List<Integer>> edges = new ArrayList<>(M);
+        for (int i = 0; i < M; i++) {
+            edges.add(
+                Arrays.asList(scan.nextLine().trim().split(" "))
+                        .stream().map(s -> Integer.parseInt(s)).collect(Collectors.toList())
+            );
+        }
+
+        int Q = Integer.parseInt(scan.nextLine().trim());
+        List<List<Integer>> queries = new ArrayList<>(Q);
+        for (int i = 0; i < Q; i++) {
+            queries.add(
+                Arrays.asList(scan.nextLine().trim().split(" "))
+                        .stream().map(s -> Integer.parseInt(s)).collect(Collectors.toList())
+            );
+        }
+
+        int result = solve(N, R, M, edges, Q, queries);
         System.out.println(result);
     }
 }
