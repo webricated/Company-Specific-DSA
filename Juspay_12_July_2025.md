@@ -386,7 +386,7 @@ Complete the `solve` function in the editor below. It has the following paramete
 
 ---
 
-```
+```Java
 import java.util.*;
 
 public class SmartCityTrafficToll {
