@@ -307,9 +307,6 @@ public class Solution {
 
 ```
 ---
-Certainly! Below is the fully formatted version in **Markdown**, preserving the original **table format for sample testcases and outputs**, and keeping everything clean and structured:
-
----
 
 # 1. Smart City Traffic Toll System
 
@@ -448,6 +445,151 @@ public class SmartCityTrafficToll {
             }
         }
         sc.close();
+    }
+}
+```
+---
+
+# 11. Network Technician’s Mission
+
+In the city of Techville, a network technician named Sam is tasked with inspecting a newly established network of communication towers. The network is structured as a rooted tree with **n** towers, with the main control tower located at **node 1**. This control tower serves as the central hub for all communications.
+
+The network is built through various terrains, some of which are marked as hazardous zones. Each tower is either in a safe zone or a hazardous one. The outermost towers (the leaf nodes of the tree) need to be inspected by Sam, but he is cautious and wants to avoid paths that traverse through too many consecutive hazardous zones.
+
+**Your task** is to help Sam count the number of outermost towers (leaf nodes) he can safely inspect, where the path from the main control tower to the leaf contains no more than **M** consecutive hazardous zones.
+
+> It is guaranteed that the given set of edges forms a tree structure.
+
+---
+
+### **Function description**
+
+Complete the `safeViewPoints` function in the editor below.
+It has the following parameter(s):
+
+| Name | Type             | Description                                                                     |
+| ---- | ---------------- | ------------------------------------------------------------------------------- |
+| N    | INTEGER          | the number of nodes in the tree                                                 |
+| M    | INTEGER          | the maximum number of consecutive dangerous sections Sam is willing to traverse |
+| k    | INTEGER          | Always equals to N - 1                                                          |
+| Arr1 | INTEGER ARRAY    | Array of N integers stating if tower in safe zone or not                        |
+| Arr2 | INTEGER 2D ARRAY | 2D array of size N - 1 with two values                                          |
+
+---
+
+### **Return**
+
+The function must return an **INTEGER** denoting the number of viewpoints (leaf nodes) where the path from the main camp (node 1) contains at most M consecutive dangerous sections.
+
+---
+
+### **Constraints**
+
+* $2 \leq N \leq 10^5$
+* $1 \leq M \leq N$
+* $N - 1 \leq k \leq N - 1$
+* $1 \leq \text{Arr1}[i] \leq 10^5$
+* $1 \leq \text{Arr2}[i][j] \leq 10^5$
+
+---
+
+### **Input format for debugging**
+
+* The first line contains an integer, **N**, denoting the number of elements in `Arr1`.
+* The next line contains an integer, **M**.
+* The next line contains an integer, **k**, denoting the number of rows in `Arr2`.
+* Each line of the N subsequent lines (where $0 \leq i < N$) contains an integer describing `Arr1[i]`.
+* Each line i of the k subsequent lines (where $0 \leq i < k$) contains 2 space separated integers each describing the row `Arr2[i]`.
+
+---
+
+### **Sample Testcases**
+
+| Input | Output | Output Description                                                |
+| ----- | ------ | ----------------------------------------------------------------- |
+| `7`<br>`1`<br>`6`<br>`1`<br>`0`<br>`1`<br>`1`<br>`0`<br>`0`<br>`0`<br>`1`<br>`1`<br>`12`<br>`13`<br>`24`<br>`25`<br>`36`<br>`37`     |    `2`    | The number of outermost towers (leaf nodes) he can safely inspect |
+|`5`<br>`2`<br>`4`<br>`1`<br>`1`<br>`0`<br>`1`<br>`1`<br>`1 2`<br>`2 3`<br>`3 4`<br>`4 5`|    `1`   | The number of outermost towers (leaf nodes) he can safely inspect |
+
+
+---
+```Java
+11.Network technician mission
+
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+    public static int safeViewPoints(int N, int M, int k, List<Integer> Arr1, List<List<Integer>> Arr2) {
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i < N; i++) {
+            adj.add(new ArrayList<>());
+        }
+
+        for (List<Integer> edge : Arr2) {
+            int u = edge.get(0) - 1;
+            int v = edge.get(1) - 1;
+            adj.get(u).add(v);
+            adj.get(v).add(u);
+        }
+
+        boolean[] visited = new boolean[N];
+        int[] count = new int[1];
+
+        dfs(0, 0, M, Arr1, adj, visited, count);
+
+        return count[0];
+    }
+
+    private static void dfs(int node, int consecutive, int M, List<Integer> Arr1, List<List<Integer>> adj, boolean[] visited, int[] count) {
+        visited[node] = true;
+
+        if (Arr1.get(node) == 1) {
+            consecutive++;
+        } else {
+            consecutive = 0;
+        }
+
+        if (consecutive > M) {
+            return;
+        }
+
+        boolean isLeaf = true;
+        for (int neighbor : adj.get(node)) {
+            if (!visited[neighbor]) {
+                isLeaf = false;
+                dfs(neighbor, consecutive, M, Arr1, adj, visited, count);
+            }
+        }
+
+        if (isLeaf) {
+            count[0]++;
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+
+        int N = Integer.parseInt(scan.nextLine().trim());
+        int M = Integer.parseInt(scan.nextLine().trim());
+        int k = Integer.parseInt(scan.nextLine().trim());
+
+        List<Integer> Arr1 = new ArrayList<>();
+        String[] arr1Str = scan.nextLine().trim().split("\\s+");
+        for (String s : arr1Str) {
+            Arr1.add(Integer.parseInt(s));
+        }
+
+        List<List<Integer>> Arr2 = new ArrayList<>();
+        for (int i = 0; i < k; i++) {
+            String[] edgeStr = scan.nextLine().trim().split("\\s+");
+            List<Integer> edge = new ArrayList<>();
+            edge.add(Integer.parseInt(edgeStr[0]));
+            edge.add(Integer.parseInt(edgeStr[1]));
+            Arr2.add(edge);
+        }
+
+        int result = safeViewPoints(N, M, k, Arr1, Arr2);
+        System.out.println(result);
     }
 }
 ```
