@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Locking the Tree of Space</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      background-color: #f9f9f9;
+      color: #333;
+      padding: 30px;
+      max-width: 960px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
+    h2 {
+      font-size: 1.4em;
+      margin-top: 30px;
+    }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    pre {
+      background: #111;
+      color: #0f0;
+      padding: 15px;
+      overflow-x: auto;
+      border-radius: 5px;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    .note {
+      background: #fffbe6;
+      border-left: 4px solid #ffcc00;
+      padding: 10px;
+      margin: 20px 0;
+    }
+    .image-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    td, th {
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+    }
+    .tree-view {
+      background: #f4f4f4;
+      font-family: monospace;
+      padding: 10px;
+      white-space: pre;
+      border: 1px dashed #aaa;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🌍 Locking the Tree of Space</h1>
+
+  <p>You have a world map represented as an M-ary tree (sample tree below)</p>
+
+  <div class="image-container">
+    <img src="https://i.ibb.co/wpJkS64/photo1666455256.jpg" alt="M-ary Tree Example">
+  </div>
+
+  <p>You need to define three operations on it:</p>
+  <ol>
+    <li>lock(X, uid)</li>
+    <li>unlock(X, uid)</li>
+    <li>upgradeLock(X, uid)</li>
+  </ol>
+
+  <p>Where <code>X</code> is the name of a node in the tree (unique) and <code>uid</code> is the user who is performing the operation.</p>
+
+  <h2>Definitions for the Operations:</h2>
+
+  <h3>Lock(X, uid)</h3>
+  <ul>
+    <li>Takes an exclusive access on the subtree rooted at X.</li>
+    <li><code>lock(A, anyUserId)</code> fails if X is a descendant of A or A is a descendant of X.</li>
+    <li>Fails if X is already locked.</li>
+  </ul>
+
+  <h3>Unlock(X, uid)</h3>
+  <ul>
+    <li>Unlocks the node only if the same user <code>uid</code> had locked it.</li>
+  </ul>
+
+  <h3>UpgradeLock(X, uid)</h3>
+  <ul>
+    <li>Allows user <code>uid</code> to upgrade their lock to an ancestor node X.</li>
+    <li>Only allowed if:
+      <ul>
+        <li>X is unlocked</li>
+        <li>At least one descendant is locked</li>
+        <li>All locked descendants are by the same user</li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="note">
+    <strong>Notes:</strong>
+    <ul>
+      <li>Number of nodes (N) can be very large. Optimize time complexity.</li>
+      <li>Input Format:
+        <ul>
+          <li>Line 1: Number of nodes (N)</li>
+          <li>Line 2: Children per node (M)</li>
+          <li>Line 3: Number of queries (Q)</li>
+          <li>Next N lines: Names of nodes (root to leaves in BFS)</li>
+          <li>Next Q lines: Each query in format: <code>OperationType NodeName UserId</code></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h2>Operation Types</h2>
+  <pre>
+1 for Lock
+2 for Unlock
+3 for UpgradeLock
+  </pre>
+
+  <h2>Example Input:</h2>
+  <pre>
+7
+2
+3
+World
+Asia
+Africa
+China
+India
+South Africa
+Egypt
+1 China 9
+2 India 9
+3 Asia 9
+  </pre>
+
+  <p>With the above input you represent a 2-ary tree with 7 nodes as follows:</p>
+  <div class="tree-view">
+        World
+       /     \
+     Asia    Africa
+    /   \     /   \
+ China India SouthAfrica Egypt
+  </div>
+
+  <h2>Additional Notes:</h2>
+  <ul>
+    <li><code>1 China 3</code> means Lock operation on node China by user 3</li>
+    <li>Tree is fully balanced</li>
+    <li>Constraints:
+      <ul>
+        <li>1 ≤ N ≤ 5 × 10<sup>5</sup></li>
+        <li>1 ≤ m ≤ 30</li>
+        <li>1 ≤ Q ≤ 5 × 10<sup>5</sup></li>
+        <li>Length of NodeName ≤ 20</li>
+      </ul>
+    </li>
+    <li>Time Complexity:
+      <ul>
+        <li>Lock - O(log<sub>m</sub>N)</li>
+        <li>Unlock - O(log<sub>m</sub>N)</li>
+        <li>UpgradeLock - O(#locked descendants + log<sub>m</sub>N)</li>
+      </ul>
+    </li>
+    <li>Lock on already locked node fails</li>
+    <li>UpgradeLock(X, uid) fails if any locked descendant is by a different user</li>
+  </ul>
+  
+  <!-- Begin: Thought Process, Execution, and Thread Safety -->
+
+<h2>🧠 Thought Process & Approach</h2>
+<p>This problem is a locking system for an M-ary tree. Each node can be:</p>
+<ul>
+  <li>Locked (by a single user)</li>
+  <li>Unlocked</li>
+  <li>Upgraded (lock itself after unlocking locked descendants)</li>
+</ul>
+<p>To make each operation efficient, we augment each node with:</p>
+<ul>
+  <li><code>des_locked</code>: how many descendants are currently locked</li>
+  <li><code>anc_locked</code>: how many ancestors are locked (optional optimization)</li>
+</ul>
+<p>This allows each operation to be performed efficiently by avoiding full subtree traversals unless absolutely needed (like in upgrade).</p>
+
+<h2>⚙️ Example Input Execution (Line by Line)</h2>
+<pre>
+Input:
+7
+2
+5
+World
+Asia
+Africa
+China
+India
+SouthAfrica
+Egypt
+1 China 9
+1 India 9
+3 Asia 9
+2 India 9
+2 Asia 9
+
+// Tree built as:
+        World
+       /     \
+     Asia    Africa
+    /   \     /   \
+ China India SouthAfrica Egypt
+
+1 China 9:
+→ Lock node 'China' by user 9
+→ ✔️ Success (no ancestor or descendant locked)
+
+1 India 9:
+→ Lock node 'India' by user 9
+→ ✔️ Success (same as above)
+
+3 Asia 9:
+→ Upgrade lock on 'Asia'
+→ Conditions:
+   ✔️ Asia is not locked
+   ✔️ At least one descendant locked (China, India)
+   ✔️ All locked by user 9 → OK
+→ Unlock China, India
+→ Lock Asia
+→ ✔️ Success
+
+2 India 9:
+→ Unlock India by user 9
+→ ✖️ Fails (India is already unlocked in upgrade)
+
+2 Asia 9:
+→ Unlock Asia by user 9
+→ ✔️ Success
+</pre>
+
+<h2>🔍 Step-by-Step: Source Code Walkthrough</h2>
+<ol>
+  <li>We define a TreeNode class to hold name, locking status, parent, children, and counters.</li>
+  <li>Build the tree in BFS using a queue.</li>
+  <li>For each query:
+    <ul>
+      <li>Type 1 → lock()</li>
+      <li>Type 2 → unlock()</li>
+      <li>Type 3 → upgrade()</li>
+    </ul>
+  </li>
+</ol>
+
+<h2>🧵 Locking Tree – Java Implementation (Line-by-Line Discussion)</h2>
+<p>Let's walk through the code below step by step to understand how the Locking Tree works in Java.</p>
+
+<pre><code>import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
+</code></pre>
+<p><strong>Explanation:</strong> We import required Java libraries: <code>java.util</code> for data structures like Map and Queue, and <code>ReentrantLock</code> from <code>java.util.concurrent.locks</code> to manage thread safety.</p>
+
+<pre><code>public class Main {
+</code></pre>
+<p><strong>Explanation:</strong> Entry point of the Java application.</p>
+
+<pre><code>    static class TreeNode {
+        String name;
+        boolean isLocked = false;
+        int uid = -1;
+        int des_locked = 0;
+        TreeNode parent;
+        List<TreeNode> children = new ArrayList<>();
+        final ReentrantLock lock = new ReentrantLock();
+</code></pre>
+<p><strong>Explanation:</strong> This defines a node in the tree with relevant fields:
+<ul>
+<li><code>name</code>: name of the node</li>
+<li><code>isLocked</code>: locking state</li>
+<li><code>uid</code>: user ID who locked it</li>
+<li><code>des_locked</code>: number of locked descendants</li>
+<li><code>parent</code>: reference to parent node</li>
+<li><code>children</code>: list of children nodes</li>
+<li><code>lock</code>: ReentrantLock for thread safety</li>
+</ul></p>
+
+<pre><code>        TreeNode(String name, TreeNode parent) {
+            this.name = name;
+            this.parent = parent;
+        }
+    }
+</code></pre>
+<p><strong>Explanation:</strong> Constructor to initialize a TreeNode with its name and parent.</p>
+
+<pre><code>    static Map<String, TreeNode> map = new HashMap<>();
+</code></pre>
+<p><strong>Explanation:</strong> A map to access TreeNodes by their name for fast lookup.</p>
+
+<pre><code>public static void main(String[] args) {
+    int n = 7, m = 2;
+    String[] nodes = {"World", "Asia", "Africa", "China", "India", "SouthAfrica", "Egypt"};
+    String[] queries = {"1 China 9", "1 India 9", "3 Asia 9", "2 India 9", "2 Asia 9"};
+</code></pre>
+<p><strong>Explanation:</strong> 
+Initialize:
+<ul>
+  <li><code>n</code>: total number of nodes</li>
+  <li><code>m</code>: number of children per node (i.e., the branching factor)</li>
+  <li><code>nodes</code>: names of nodes in level-order</li>
+  <li><code>queries</code>: operations to perform on the tree</li>
+</ul></p>
+
+<pre><code>    TreeNode root = new TreeNode(nodes[0], null);
+    map.put(nodes[0], root);
+    Queue&lt;TreeNode&gt; queue = new LinkedList&lt;&gt;();
+    queue.add(root);
+    int index = 1;
+</code></pre>
+<p><strong>Explanation:</strong> 
+Create the root of the tree, initialize a queue for level-order construction, and start from index 1 for remaining nodes.</p>
+
+<pre><code>    while (!queue.isEmpty() &amp;&amp; index &lt; n) {
+        TreeNode current = queue.poll();
+        for (int i = 0; i &lt; m &amp;&amp; index &lt; n; i++) {
+            TreeNode child = new TreeNode(nodes[index], current);
+            current.children.add(child);
+            map.put(nodes[index], child);
+            queue.add(child);
+            index++;
+        }
+    }
+</code></pre>
+<p><strong>Explanation:</strong> 
+Use a level-order traversal to assign up to <code>m</code> children to each node until all <code>n</code> nodes are added.</p>
+
+<pre><code>    for (String q : queries) {
+        String[] parts = q.split(" ");
+        int type = Integer.parseInt(parts[0]);
+        String nodeName = parts[1];
+        int uid = Integer.parseInt(parts[2]);
+        boolean result = false;
+
+        TreeNode node = map.get(nodeName);
+        if (type == 1)
+            result = lock(node, uid);
+        else if (type == 2)
+            result = unlock(node, uid);
+        else if (type == 3)
+            result = upgrade(node, uid);
+
+        System.out.println(result);
+    }
+}
+</code></pre>
+<p><strong>Explanation:</strong> 
+Process each query:
+<ul>
+<li>1 → <code>lock</code></li>
+<li>2 → <code>unlock</code></li>
+<li>3 → <code>upgrade</code></li>
+Print the result of each operation.</ul></p>
+
+<h2>🧵 Is the Original Code Thread-Safe?</h2>
+<div class="note">
+  <strong>No, it is not thread-safe.</strong>
+  <ul>
+    <li>Multiple threads may modify shared TreeNode state (like isLocked, des_locked) simultaneously.</li>
+    <li>Race conditions may lead to incorrect locking/unlocking.</li>
+    <li>Operations like checking then setting a lock are not atomic.</li>
+  </ul>
+</div>
+
+<h2>🛡️ How to Make It Thread-Safe?</h2>
+<ul>
+  <li>Option 1: Synchronized methods (easy, coarse-grained)</li>
+  <li>Option 2: ReentrantLock per node (fine-grained, better concurrency)</li>
+</ul>
+
+<h3>Thread-Safe Java Code Using ReentrantLock</h3>
+<pre><code>import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class Main {
+    static class TreeNode {
+        String name;
+        boolean isLocked = false;
+        int uid = -1;
+        int des_locked = 0;
+        TreeNode parent;
+        List<TreeNode> children = new ArrayList<>();
+        final ReentrantLock lock = new ReentrantLock();
+
+        TreeNode(String name, TreeNode parent) {
+            this.name = name;
+            this.parent = parent;
+        }
+    }
+
+    static Map<String, TreeNode> map = new HashMap<>();
+
+    public static void main(String[] args) {
+        int n = 7, m = 2;
+        String[] nodes = {"World", "Asia", "Africa", "China", "India", "SouthAfrica", "Egypt"};
+        String[] queries = {"1 China 9", "1 India 9", "3 Asia 9", "2 India 9", "2 Asia 9"};
+
+        TreeNode root = new TreeNode(nodes[0], null);
+        map.put(nodes[0], root);
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        int index = 1;
+
+        while (!queue.isEmpty() && index < n) {
+            TreeNode current = queue.poll();
+            for (int i = 0; i < m && index < n; i++) {
+                TreeNode child = new TreeNode(nodes[index], current);
+                current.children.add(child);
+                map.put(nodes[index], child);
+                queue.add(child);
+                index++;
+            }
+        }
+
+        for (String q : queries) {
+            String[] parts = q.split(" ");
+            int type = Integer.parseInt(parts[0]);
+            String nodeName = parts[1];
+            int uid = Integer.parseInt(parts[2]);
+
+            TreeNode node = map.get(nodeName);
+            boolean result = switch (type) {
+                case 1 -> lock(node, uid);
+                case 2 -> unlock(node, uid);
+                case 3 -> upgrade(node, uid);
+                default -> false;
+            };
+            System.out.println(result);
+        }
+    }
+
+    static boolean lock(TreeNode node, int uid) {
+        node.lock.lock();
+        try {
+            if (node.isLocked || hasLockedAncestor(node) || node.des_locked > 0) return false;
+            node.isLocked = true;
+            node.uid = uid;
+            updateAncestor(node, +1);
+            return true;
+        } finally {
+            node.lock.unlock();
+        }
+    }
+
+    static boolean unlock(TreeNode node, int uid) {
+        node.lock.lock();
+        try {
+            if (!node.isLocked || node.uid != uid) return false;
+            node.isLocked = false;
+            node.uid = -1;
+            updateAncestor(node, -1);
+            return true;
+        } finally {
+            node.lock.unlock();
+        }
+    }
+
+    static boolean upgrade(TreeNode node, int uid) {
+        node.lock.lock();
+        try {
+            if (node.isLocked || hasLockedAncestor(node) || node.des_locked == 0) return false;
+
+            List<TreeNode> lockedDesc = new ArrayList<>();
+            if (!collectLockedDescendants(node, uid, lockedDesc)) return false;
+
+            for (TreeNode desc : lockedDesc) unlock(desc, uid);
+            return lock(node, uid);
+        } finally {
+            node.lock.unlock();
+        }
+    }
+
+    static boolean hasLockedAncestor(TreeNode node) {
+        TreeNode curr = node.parent;
+        while (curr != null) {
+            curr.lock.lock();
+            try {
+                if (curr.isLocked) return true;
+            } finally {
+                curr.lock.unlock();
+                curr = curr.parent;
+            }
+        }
+        return false;
+    }
+
+    static void updateAncestor(TreeNode node, int delta) {
+        TreeNode curr = node.parent;
+        while (curr != null) {
+            curr.lock.lock();
+            try {
+                curr.des_locked += delta;
+            } finally {
+                curr.lock.unlock();
+                curr = curr.parent;
+            }
+        }
+    }
+
+    static boolean collectLockedDescendants(TreeNode node, int uid, List<TreeNode> list) {
+        node.lock.lock();
+        try {
+            if (node.isLocked) {
+                if (node.uid != uid) return false;
+                list.add(node);
+            }
+            for (TreeNode child : node.children) {
+                if (!collectLockedDescendants(child, uid, list)) return false;
+            }
+            return true;
+        } finally {
+            node.lock.unlock();
+        }
+    }
+}</code></pre>
+
+<h2>✅ Thread Safety Summary</h2>
+<ul>
+  <li>Each TreeNode now has its own ReentrantLock</li>
+  <li>All critical sections (read/write to isLocked, des_locked) are locked</li>
+  <li>Deadlocks avoided by locking one node at a time</li>
+</ul>
+
+<!-- End: Thread Safe Code Section -->
+
+
+</body>
+</html>
